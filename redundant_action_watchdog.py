@@ -45,14 +45,20 @@ configure
         # if it has same head branch, then cancel ahead one
         for wfr in r.get_workflow_runs():
             if wfr.status == 'queued':
-                in_progress_wfs_by_head[wfr.head_branch] = wfr
-            elif wfr.status == 'in_progress' and wfr.head_branch in in_progress_wfs_by_head:
                 wf = r.get_workflow(str(wfr.raw_data['workflow_id']))
-                m = re.match(filter, wf.name)
-                if m:
-                    wfr.cancel()
-                    subsequent = in_progress_wfs_by_head[wfr.head_branch]
-                    logger.info(f'cancel workflow run id: {wfr.id}, subsequent: {subsequent.id}, branch: {wfr.head_branch}')
+                key = (wf.id, wfr.head_branch)
+                in_progress_wfs_by_head[key] = wfr
+            elif wfr.status == 'in_progress':
+                wf = r.get_workflow(str(wfr.raw_data['workflow_id']))
+                # decision rule of same workflow
+                #   combination of both workflow id and head branch
+                key = (wf.id, wfr.head_branch)
+                if key in in_progress_wfs_by_head:
+                    m = re.match(filter, wf.name)
+                    if m:
+                        wfr.cancel()
+                        subsequent = in_progress_wfs_by_head[key]
+                        logger.info(f'cancel workflow id: {wf.id}, run id: {wfr.id}, subsequent: {subsequent.id}, branch: {wfr.head_branch}')
 
         sleep(interval)
 
