@@ -14,5 +14,5 @@ So that it can reduce redundant workflow process in github actions.
 ```
 pip install -r requirements.txt
 
-python gh_action_watchdog.py --repo-owner {repo owner} --repo-name {repo name} --gh-token {personal access token}
+python redundant_action_watchdog.py --repo-owner {repo owner} --repo-name {repo name} --gh-token {personal access token}
 ```
